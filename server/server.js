@@ -1,21 +1,39 @@
-const express = require('express');
-const morgan = require("morgan");
-const cors = require("cors");
-const dotenv = require('dotenv');
-dotenv.config();
-const app = express();
-const port = process.env.PORT;
+const dotenv = require("dotenv");
+dotenv.config({path: '../config.env'});
 
 
-app.use(express.json());
-app.use(cors());
-app.use(morgan("dev"));
-
-app.get('/', (req, res) => {
-  console.log('Hi there');
-  res.send({Hi: 'Error'});
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+  console.log('UNCAUGHT REJECTION! Shutting down...');
+  process.exit(1);
 });
 
-app.listen(port, () => {
+const mongoose = require("mongoose");
+const app = require("./app");
+
+const port = process.env.PORT;
+
+mongoose
+  .connect(process.env.MONGO_CONNECTIONS, {
+    useNewUrlParser: true,
+  })
+  .then(() => {
+    console.log("Connected to mongoDB successfully");
+  })
+  .catch((error) => {
+    console.log(process.env.PORT)
+    console.error(error.message);
+    process.exit(1);
+  });
+
+const server = app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
+});
+
+process.on('unhandledRejection', err => {  
+  console.log(err.name, err.message);
+  console.log('UNHANDLED REJECTION! Shutting down...');
+  server.close(() => {
+    process.exit(1);
+  });
 });
