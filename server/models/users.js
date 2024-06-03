@@ -27,7 +27,8 @@ const userSchema = new mongoose.Schema({
     select: false // when someone hit getAllUser api then i do not want to show all user password field to anyone
   },
   isSeller: {
-    type: Boolean
+    type: Boolean,
+    required: [true, 'isSeller is required']
   },
   address: {
     type: String,
